@@ -7,16 +7,25 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
+
+import com.sun.net.ssl.HttpsURLConnection;
+
+
 
 public class SetupStreams extends Thread{
 	
-	
+	private int contentlength = 0;
 	private final int BUFSIZE = 9000;
 	private Socket socket;
 	private DataInputStream inputStream;
 	private DataOutputStream outputStream;
 	private int userId;
+
 	
 	public SetupStreams(Socket socket,int client) {
 		this.socket = socket;
@@ -35,33 +44,65 @@ public class SetupStreams extends Thread{
 		
 	}
 	
+	//for POST
+	private String readBody(BufferedReader reader) throws IOException {
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < contentlength; i++) {
+			data.append((char)reader.read());
+		}
+		
+		return data.toString();
+	}
+
+	
+	//for GET
 	@Override	
 	public void run(){
-		System.out.println("prr");
 		
+
 		//fixing
 		StringBuilder builder = new StringBuilder(); 
-		String line;
 		
+		 
 		try {
 			BufferedReader in = new BufferedReader(
-					  new InputStreamReader(socket.getInputStream(), "UTF-8")
+					  new InputStreamReader(socket.getInputStream())
 					);
-			do
-			{
-			    line = in.readLine(); 
-			    if (line.equals("")) break;
-			    builder.append(line);
-			}
-			while (true);
+		
+			
+			
+			while(true) {
+				String line = in.readLine();
+				if (line == null) { //eof http://docs.oracle.com/javase/1.4.2/docs/api/java/io/BufferedReader.html
+					throw new IOException("eof");
+				}
 				
+				builder.append(line);
+				builder.append("\r\n");
+				if (line == null || line.equals("\r\n") || line.equals("")) {
+					break;
+				}
+				if (line.startsWith("Content-Length:")) {
+					String number = line.substring(16);
+					contentlength  = Integer.parseInt(number); 
+				}
+
+				
+				
+				
+			}
+			
+			System.out.println(builder.toString());	
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
-		System.out.println(builder.toString());
+		
 	}
+	
 
 }
+
