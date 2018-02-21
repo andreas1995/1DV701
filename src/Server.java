@@ -6,27 +6,32 @@ import java.net.Socket;
 
 public class Server {
 
-	public static final int MYPORT = 4950;
-	private static ServerSocket socket ;
-	
+	public  static final int MYPORT = 4950;
+	private static ServerSocket connection ;
+	private static int clientID = 1;
 	
 	public static void main(String[] args) throws IOException {
 		
 		try {
-			socket = new ServerSocket(MYPORT);
+			//create the server socket
+			connection = new ServerSocket(MYPORT);
 		} catch (IOException e) {
+			//print if there is an error
 			System.out.println("Server can not run. Port is in use.");
 			System.exit(1);
 		}
 		
 		System.out.println("Server is running");
 
-		int clientId = 0;
+		
 		while (true) {
-			Socket clientSocket = socket.accept();
-			//ServerThread client = new ServerThread(socket, ++clientId);
-			//client.start();
+			//make a new connection and start a new thread for every client
+			Socket socket = connection.accept();
+			System.out.println("Connection established Client ID: "+clientID);
+			SetupStreams client = new SetupStreams(socket, clientID++);
+			client.start();
 		}
 	}
+	
 
 }
