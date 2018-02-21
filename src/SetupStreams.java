@@ -1,7 +1,9 @@
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -36,6 +38,30 @@ public class SetupStreams extends Thread{
 	@Override	
 	public void run(){
 		System.out.println("prr");
+		
+		//fixing
+		StringBuilder builder = new StringBuilder(); 
+		String line;
+		
+		try {
+			BufferedReader in = new BufferedReader(
+					  new InputStreamReader(socket.getInputStream(), "UTF-8")
+					);
+			do
+			{
+			    line = in.readLine(); 
+			    if (line.equals("")) break;
+			    builder.append(line);
+			}
+			while (true);
+				
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		System.out.println(builder.toString());
 	}
 
 }
